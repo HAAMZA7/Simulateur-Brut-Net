@@ -154,11 +154,16 @@ function App() {
             <footer className="footer">
                 <p>Estimation basée sur les taux moyens France 2025</p>
                 <p className="copyright">© BrutNet</p>
-                <p className="signature">
-                    Made with <span className="heart">❤️</span> by <strong>Hamza DJOUDI</strong>
-                    {' • '}
-                    <a href="https://djoudi.dev" target="_blank" rel="noopener">djoudi.dev</a>
-                </p>
+                <div className="signature">
+                    <p className="signature-content">
+                        <span>Made with</span>
+                        <span className="heart">❤️</span>
+                        <span>by <strong>Hamza DJOUDI</strong></span>
+                    </p>
+                    <a href="https://djoudi.dev" target="_blank" rel="noopener" className="signature-link">
+                        djoudi.dev
+                    </a>
+                </div>
             </footer>
         </div>
     )
