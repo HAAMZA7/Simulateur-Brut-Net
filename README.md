@@ -56,4 +56,4 @@ MIT - Libre d'utilisation
 
 ---
 
-**Made with ❤️ by [HAAMZA7](https://github.com/HAAMZA7)**
+**Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)**

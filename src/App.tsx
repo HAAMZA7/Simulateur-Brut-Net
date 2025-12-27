@@ -154,6 +154,11 @@ function App() {
             <footer className="footer">
                 <p>Estimation basée sur les taux moyens France 2025</p>
                 <p className="copyright">© BrutNet</p>
+                <p className="signature">
+                    Made with <span className="heart">❤️</span> by <strong>Hamza DJOUDI</strong>
+                    {' • '}
+                    <a href="https://djoudi.dev" target="_blank" rel="noopener">djoudi.dev</a>
+                </p>
             </footer>
         </div>
     )
