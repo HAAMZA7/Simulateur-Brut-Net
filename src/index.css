@@ -1,0 +1,329 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    --bg: #0a0a0f;
+    --surface: #16161f;
+    --surface-light: #1e1e2a;
+    --accent: #6c5ce7;
+    --accent-light: #a29bfe;
+    --success: #00d084;
+    --text: #ffffff;
+    --text-secondary: #8b8b9e;
+    --text-muted: #5c5c6d;
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero */
+.hero {
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(108, 92, 231, 0.15) 0%, transparent 100%);
+}
+
+.brand {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin-top: 0.25rem;
+}
+
+/* Calculator */
+.calculator {
+    flex: 1;
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+    display: flex;
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 0.25rem;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: none;
+    border-radius: 0.75rem;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+/* Input Section */
+.input-section {
+    background: var(--surface);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+}
+
+.input-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.salary-input {
+    flex: 1;
+    font-size: 3rem;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    letter-spacing: -0.02em;
+}
+
+.salary-input::placeholder {
+    color: var(--text-muted);
+}
+
+.currency {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Status Section */
+.status-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.status-label {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.status-toggle {
+    display: flex;
+    background: var(--surface);
+    border-radius: 0.75rem;
+    padding: 0.1875rem;
+}
+
+.status-btn {
+    padding: 0.625rem 1rem;
+    border: none;
+    border-radius: 0.625rem;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-btn.active {
+    background: var(--surface-light);
+    color: var(--text);
+}
+
+/* Results */
+.results {
+    background: var(--surface);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 0;
+}
+
+.result-row:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+.result-row .result-label {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.result-row .result-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.result-row.highlight {
+    background: linear-gradient(135deg, rgba(0, 208, 132, 0.15) 0%, rgba(0, 208, 132, 0.05) 100%);
+    margin: 0.5rem -1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    border: none !important;
+}
+
+.result-row.highlight .result-label {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.result-row.highlight .result-value {
+    color: var(--success);
+}
+
+.result-row.highlight .result-value.big {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.result-row.muted .result-label,
+.result-row.muted .result-value {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.result-row.annual {
+    padding-top: 1rem;
+}
+
+.result-row.annual .result-label {
+    color: var(--text-muted);
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.5rem 0;
+}
+
+/* Quick Amounts */
+.quick-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.quick-btn {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent-light);
+}
+
+.quick-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+/* Footer */
+.footer {
+    padding: 1.5rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+}
+
+.footer p {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.footer .copyright {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (min-width: 600px) {
+    .hero {
+        padding: 4rem 2rem 3rem;
+    }
+
+    .brand {
+        font-size: 2.5rem;
+    }
+
+    .calculator {
+        padding: 0 2rem 3rem;
+    }
+
+    .salary-input {
+        font-size: 4rem;
+    }
+
+    .currency {
+        font-size: 2.5rem;
+    }
+}
+
+/* Safe area for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .footer {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+}
