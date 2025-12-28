@@ -2,12 +2,10 @@ import { useState, useMemo } from 'react'
 import './App.css'
 
 // Taux de cotisations France 2025 (moyenne estimée)
-// Réalité : 22-30% selon revenus et conventions collectives
-const TAUX_NON_CADRE = 0.22 // ~22% (CSG/CRDS + retraite + complémentaire)
-const TAUX_CADRE = 0.25     // ~25% (cotisations supplémentaires APEC, prévoyance)
+const TAUX_NON_CADRE = 0.22
+const TAUX_CADRE = 0.25
 
-// Tranches d'imposition 2025 OFFICIELLES (revenus 2024)
-// Source: impots.gouv.fr / service-public.fr
+// Tranches d'imposition 2025 OFFICIELLES
 const TRANCHES_IMPOT = [
     { min: 0, max: 11497, taux: 0 },
     { min: 11497, max: 29315, taux: 0.11 },
@@ -16,29 +14,23 @@ const TRANCHES_IMPOT = [
     { min: 180294, max: Infinity, taux: 0.45 }
 ]
 
-// Calcul des parts fiscales
 function calculerParts(isMarried: boolean, enfants: number): number {
     let parts = isMarried ? 2 : 1
-    // 2 premiers enfants = 0.5 part chacun
-    // À partir du 3ème = 1 part chacun
     if (enfants >= 1) parts += 0.5
     if (enfants >= 2) parts += 0.5
     if (enfants >= 3) parts += (enfants - 2) * 1
     return parts
 }
 
-// Calcul de l'impôt sur le revenu
 function calculerImpot(revenuNetImposable: number, parts: number): number {
     const quotient = revenuNetImposable / parts
     let impotParPart = 0
-
     for (const tranche of TRANCHES_IMPOT) {
         if (quotient > tranche.min) {
             const montantDansTranche = Math.min(quotient, tranche.max) - tranche.min
             impotParPart += montantDansTranche * tranche.taux
         }
     }
-
     return impotParPart * parts
 }
 
@@ -65,7 +57,6 @@ function App() {
             cotisations = brut - netAvantImpots
         }
 
-        // Calcul impôt sur le revenu annuel
         const netAnnuelAvantImpots = netAvantImpots * 12
         const parts = calculerParts(isMarried, enfants)
         const impotAnnuel = calculerImpot(netAnnuelAvantImpots, parts)
@@ -79,192 +70,124 @@ function App() {
             cotisations,
             tauxCotisations: taux * 100,
             impotMensuel,
-            impotAnnuel,
             netApresImpots,
+            brutAnnuel: brut * 12,
             netAnnuelApresImpots: netApresImpots * 12,
             parts,
             tauxImposition
         }
     }, [montant, isCadre, mode, isMarried, enfants])
 
-    const formatMontant = (n: number) => {
-        return n.toLocaleString('fr-FR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        })
-    }
+    const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
     return (
         <div className="app">
-            {/* Hero Section */}
-            <section className="hero">
-                <div className="hero-content">
-                    <h1 className="brand">BrutNet</h1>
-                    <p className="subtitle">Calculateur de salaire complet</p>
-                </div>
-            </section>
+            {/* Hero */}
+            <header className="hero">
+                <h1 className="brand">BrutNet</h1>
+                <p className="tagline">Simulateur de salaire France 2025</p>
+            </header>
 
-            {/* Calculator */}
             <main className="calculator">
                 {/* Mode Toggle */}
-                <div className="mode-toggle">
-                    <button
-                        className={`mode-btn ${mode === 'brut' ? 'active' : ''}`}
-                        onClick={() => setMode('brut')}
-                    >
+                <div className="toggle-group">
+                    <button className={`toggle-btn ${mode === 'brut' ? 'active' : ''}`} onClick={() => setMode('brut')}>
                         Brut → Net
                     </button>
-                    <button
-                        className={`mode-btn ${mode === 'net' ? 'active' : ''}`}
-                        onClick={() => setMode('net')}
-                    >
+                    <button className={`toggle-btn ${mode === 'net' ? 'active' : ''}`} onClick={() => setMode('net')}>
                         Net → Brut
                     </button>
                 </div>
 
-                {/* Input */}
-                <div className="input-section">
-                    <label className="input-label">
-                        {mode === 'brut' ? 'Salaire brut mensuel' : 'Salaire net mensuel'}
-                    </label>
-                    <div className="input-wrapper">
+                {/* Input Section */}
+                <section className="card input-card">
+                    <label className="label">{mode === 'brut' ? 'Salaire brut' : 'Salaire net'} mensuel</label>
+                    <div className="input-row">
                         <input
                             type="text"
                             inputMode="numeric"
                             value={montant}
                             onChange={(e) => setMontant(e.target.value.replace(/[^0-9]/g, ''))}
-                            className="salary-input"
+                            className="big-input"
                             placeholder="3000"
                         />
-                        <span className="currency">€</span>
+                        <span className="unit">€/mois</span>
                     </div>
-                </div>
+                </section>
 
-                {/* Status Toggle */}
-                <div className="status-section">
-                    <span className="status-label">Statut</span>
-                    <div className="status-toggle">
-                        <button
-                            className={`status-btn ${!isCadre ? 'active' : ''}`}
-                            onClick={() => setIsCadre(false)}
-                        >
-                            Non-cadre
-                        </button>
-                        <button
-                            className={`status-btn ${isCadre ? 'active' : ''}`}
-                            onClick={() => setIsCadre(true)}
-                        >
-                            Cadre
-                        </button>
-                    </div>
-                </div>
-
-                {/* Situation Familiale */}
-                <div className="family-section">
-                    <div className="family-row">
-                        <span className="family-label">Situation</span>
-                        <div className="status-toggle">
-                            <button
-                                className={`status-btn ${!isMarried ? 'active' : ''}`}
-                                onClick={() => setIsMarried(false)}
-                            >
-                                Seul(e)
-                            </button>
-                            <button
-                                className={`status-btn ${isMarried ? 'active' : ''}`}
-                                onClick={() => setIsMarried(true)}
-                            >
-                                Couple
-                            </button>
+                {/* Options */}
+                <section className="card options-card">
+                    <div className="option-row">
+                        <span className="option-label">Statut</span>
+                        <div className="toggle-group small">
+                            <button className={`toggle-btn ${!isCadre ? 'active' : ''}`} onClick={() => setIsCadre(false)}>Non-cadre</button>
+                            <button className={`toggle-btn ${isCadre ? 'active' : ''}`} onClick={() => setIsCadre(true)}>Cadre</button>
                         </div>
                     </div>
-                    <div className="family-row">
-                        <span className="family-label">Enfants</span>
-                        <div className="children-control">
-                            <button
-                                className="children-btn"
-                                onClick={() => setEnfants(Math.max(0, enfants - 1))}
-                                disabled={enfants === 0}
-                            >
-                                −
-                            </button>
-                            <span className="children-count">{enfants}</span>
-                            <button
-                                className="children-btn"
-                                onClick={() => setEnfants(Math.min(10, enfants + 1))}
-                            >
-                                +
-                            </button>
+                    <div className="option-row">
+                        <span className="option-label">Situation</span>
+                        <div className="toggle-group small">
+                            <button className={`toggle-btn ${!isMarried ? 'active' : ''}`} onClick={() => setIsMarried(false)}>Seul(e)</button>
+                            <button className={`toggle-btn ${isMarried ? 'active' : ''}`} onClick={() => setIsMarried(true)}>Couple</button>
                         </div>
                     </div>
-                    <div className="parts-info">
-                        {resultat.parts} part{resultat.parts > 1 ? 's' : ''} fiscale{resultat.parts > 1 ? 's' : ''}
+                    <div className="option-row">
+                        <span className="option-label">Enfants</span>
+                        <div className="counter">
+                            <button onClick={() => setEnfants(Math.max(0, enfants - 1))} disabled={enfants === 0}>−</button>
+                            <span>{enfants}</span>
+                            <button onClick={() => setEnfants(enfants + 1)}>+</button>
+                        </div>
                     </div>
-                </div>
+                    <p className="parts-badge">{resultat.parts} part{resultat.parts > 1 ? 's' : ''} fiscale{resultat.parts > 1 ? 's' : ''}</p>
+                </section>
 
-                {/* Results */}
-                <div className="results">
-                    <div className="result-row">
-                        <span className="result-label">Salaire brut</span>
-                        <span className="result-value">{formatMontant(resultat.brut)} €</span>
+                {/* Results Monthly */}
+                <section className="card results-card">
+                    <h3 className="section-title">📆 Mensuel</h3>
+
+                    <div className="result-line">
+                        <span>Brut</span>
+                        <span className="value">{fmt(resultat.brut)} €</span>
                     </div>
-
-                    <div className="result-row muted">
-                        <span className="result-label">Cotisations (~{resultat.tauxCotisations.toFixed(0)}%)</span>
-                        <span className="result-value">−{formatMontant(resultat.cotisations)} €</span>
+                    <div className="result-line dim">
+                        <span>Cotisations ({resultat.tauxCotisations.toFixed(0)}%)</span>
+                        <span className="value">−{fmt(resultat.cotisations)} €</span>
                     </div>
-
-                    <div className="result-row">
-                        <span className="result-label">Net avant impôts</span>
-                        <span className="result-value">{formatMontant(resultat.netAvantImpots)} €</span>
+                    <div className="result-line">
+                        <span>Net avant impôts</span>
+                        <span className="value">{fmt(resultat.netAvantImpots)} €</span>
                     </div>
-
-                    <div className="result-row muted">
-                        <span className="result-label">Impôt estimé (~{resultat.tauxImposition.toFixed(1)}%)</span>
-                        <span className="result-value">−{formatMontant(resultat.impotMensuel)} €</span>
-                    </div>
-
-                    <div className="divider" />
-
-                    <div className="result-row highlight">
-                        <span className="result-label">💰 Net à payer</span>
-                        <span className="result-value big">{formatMontant(resultat.netApresImpots)} €</span>
+                    <div className="result-line dim">
+                        <span>Impôt ({resultat.tauxImposition.toFixed(1)}%)</span>
+                        <span className="value">−{fmt(resultat.impotMensuel)} €</span>
                     </div>
 
-                    <div className="result-row annual">
-                        <span className="result-label">Net annuel après impôts</span>
-                        <span className="result-value">{formatMontant(resultat.netAnnuelApresImpots)} €</span>
+                    <div className="result-highlight">
+                        <span>💰 Net à payer</span>
+                        <span className="value">{fmt(resultat.netApresImpots)} €</span>
                     </div>
-                </div>
+                </section>
 
-                {/* Quick Actions */}
-                <div className="quick-amounts">
-                    {[1500, 2000, 2500, 3000, 3500, 4000, 5000].map(amount => (
-                        <button
-                            key={amount}
-                            className={`quick-btn ${montant === String(amount) ? 'active' : ''}`}
-                            onClick={() => setMontant(String(amount))}
-                        >
-                            {amount}€
-                        </button>
-                    ))}
-                </div>
+                {/* Results Annual */}
+                <section className="card results-card annual">
+                    <h3 className="section-title">📅 Annuel</h3>
+                    <div className="result-line">
+                        <span>Brut annuel</span>
+                        <span className="value">{fmt(resultat.brutAnnuel)} €</span>
+                    </div>
+                    <div className="result-line">
+                        <span>Net annuel</span>
+                        <span className="value">{fmt(resultat.netAnnuelApresImpots)} €</span>
+                    </div>
+                </section>
             </main>
 
-            {/* Footer */}
             <footer className="footer">
-                <p>Estimation basée sur les barèmes France 2025</p>
-                <p className="copyright">© BrutNet</p>
-                <div className="signature">
-                    <p className="signature-content">
-                        <span>Made with</span>
-                        <span className="heart">❤️</span>
-                        <span>by <strong>Hamza DJOUDI</strong></span>
-                    </p>
-                    <a href="https://djoudi.dev" target="_blank" rel="noopener" className="signature-link">
-                        djoudi.dev
-                    </a>
-                </div>
+                <p>Estimation basée sur les barèmes officiels 2025</p>
+                <p className="made-by">
+                    Made with ❤️ by <a href="https://djoudi.dev" target="_blank" rel="noopener">Hamza DJOUDI</a>
+                </p>
             </footer>
         </div>
     )
