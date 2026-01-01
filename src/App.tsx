@@ -5,11 +5,10 @@ import { ComparisonMode } from './components/ComparisonMode'
 import { EmployerCost } from './components/EmployerCost'
 import './index.css'
 
-// Taux de cotisations France 2025 (moyenne estimée)
+// Constants
 const TAUX_NON_CADRE = 0.22
 const TAUX_CADRE = 0.25
 
-// Tranches d'imposition 2025 OFFICIELLES
 const TRANCHES_IMPOT = [
     { min: 0, max: 11497, taux: 0 },
     { min: 11497, max: 29315, taux: 0.11 },
@@ -18,6 +17,7 @@ const TRANCHES_IMPOT = [
     { min: 180294, max: Infinity, taux: 0.45 }
 ]
 
+// Utilities
 function calculerParts(isMarried: boolean, enfants: number): number {
     let parts = isMarried ? 2 : 1
     if (enfants >= 1) parts += 0.5
@@ -38,7 +38,7 @@ function calculerImpot(revenuNetImposable: number, parts: number): number {
     return impotParPart * parts
 }
 
-type ViewMode = 'simple' | 'chart' | 'compare' | 'employer'
+type ViewMode = 'chart' | 'compare' | 'employer'
 
 function App() {
     const [montant, setMontant] = useState('3000')
@@ -98,18 +98,18 @@ function App() {
     const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
     return (
-        <div className="app">
-            {/* Hero */}
-            <header className="hero">
+        <div className="app-layout">
+            {/* Header Sémantique */}
+            <header className="app-header">
                 <motion.h1
-                    className="brand"
+                    className="app-header__title"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
                     BrutNet
                 </motion.h1>
                 <motion.p
-                    className="tagline"
+                    className="app-header__tagline"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
@@ -118,101 +118,146 @@ function App() {
                 </motion.p>
             </header>
 
-            <main className="calculator">
-                {/* Mode Toggle */}
-                <div className="toggle-group">
-                    <button className={`toggle-btn ${mode === 'brut' ? 'active' : ''}`} onClick={() => setMode('brut')}>
+            <main className="app-layout__main">
+                {/* Primary Navigation / Mode Switcher */}
+                <nav className="control-toggle" aria-label="Mode de calcul">
+                    <button
+                        className={`control-toggle__button ${mode === 'brut' ? 'control-toggle__button--active' : ''}`}
+                        onClick={() => setMode('brut')}
+                        aria-pressed={mode === 'brut'}
+                    >
                         Brut → Net
                     </button>
-                    <button className={`toggle-btn ${mode === 'net' ? 'active' : ''}`} onClick={() => setMode('net')}>
+                    <button
+                        className={`control-toggle__button ${mode === 'net' ? 'control-toggle__button--active' : ''}`}
+                        onClick={() => setMode('net')}
+                        aria-pressed={mode === 'net'}
+                    >
                         Net → Brut
                     </button>
-                </div>
+                </nav>
 
                 {/* Input Section */}
                 <motion.section
-                    className="card glass input-card"
+                    className="simulator-card simulator-card--glass"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <label className="label">{mode === 'brut' ? 'Salaire brut' : 'Salaire net'} mensuel</label>
-                    <div className="input-row">
+                    <header className="simulator-card__header">
+                        <label className="simulator-card__title" htmlFor="salary-input">
+                            {mode === 'brut' ? 'Salaire brut' : 'Salaire net'} mensuel
+                        </label>
+                    </header>
+                    <div className="salary-input">
                         <input
+                            id="salary-input"
                             type="text"
                             inputMode="numeric"
                             value={montant}
                             onChange={(e) => setMontant(e.target.value.replace(/[^0-9]/g, ''))}
-                            className="big-input"
+                            className="salary-input__field"
                             placeholder="3000"
+                            aria-label="Montant du salaire"
                         />
-                        <span className="unit">€/mois</span>
+                        <span className="salary-input__unit" aria-hidden="true">€/mois</span>
                     </div>
                 </motion.section>
 
-                {/* Options */}
+                {/* Configuration Options */}
                 <motion.section
-                    className="card glass options-card"
+                    className="simulator-card simulator-card--glass options-group"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
+                    aria-label="Paramètres de simulation"
                 >
-                    <div className="option-row">
-                        <span className="option-label">Statut</span>
-                        <div className="toggle-group small">
-                            <button className={`toggle-btn ${!isCadre ? 'active' : ''}`} onClick={() => setIsCadre(false)}>Non-cadre</button>
-                            <button className={`toggle-btn ${isCadre ? 'active' : ''}`} onClick={() => setIsCadre(true)}>Cadre</button>
+                    <div className="options-group__row">
+                        <span className="options-group__label">Statut</span>
+                        <div className="control-toggle control-toggle--inline">
+                            <button
+                                className={`control-toggle__button ${!isCadre ? 'control-toggle__button--active' : ''}`}
+                                onClick={() => setIsCadre(false)}
+                            >
+                                Non-cadre
+                            </button>
+                            <button
+                                className={`control-toggle__button ${isCadre ? 'control-toggle__button--active' : ''}`}
+                                onClick={() => setIsCadre(true)}
+                            >
+                                Cadre
+                            </button>
                         </div>
                     </div>
-                    <div className="option-row">
-                        <span className="option-label">Situation</span>
-                        <div className="toggle-group small">
-                            <button className={`toggle-btn ${!isMarried ? 'active' : ''}`} onClick={() => setIsMarried(false)}>Seul(e)</button>
-                            <button className={`toggle-btn ${isMarried ? 'active' : ''}`} onClick={() => setIsMarried(true)}>Couple</button>
+                    <div className="options-group__row">
+                        <span className="options-group__label">Situation</span>
+                        <div className="control-toggle control-toggle--inline">
+                            <button
+                                className={`control-toggle__button ${!isMarried ? 'control-toggle__button--active' : ''}`}
+                                onClick={() => setIsMarried(false)}
+                            >
+                                Seul(e)
+                            </button>
+                            <button
+                                className={`control-toggle__button ${isMarried ? 'control-toggle__button--active' : ''}`}
+                                onClick={() => setIsMarried(true)}
+                            >
+                                Couple
+                            </button>
                         </div>
                     </div>
-                    <div className="option-row">
-                        <span className="option-label">Enfants</span>
-                        <div className="counter">
-                            <button onClick={() => setEnfants(Math.max(0, enfants - 1))} disabled={enfants === 0}>−</button>
-                            <span>{enfants}</span>
-                            <button onClick={() => setEnfants(enfants + 1)}>+</button>
+                    <div className="options-group__row">
+                        <span className="options-group__label">Enfants</span>
+                        <div className="stepper">
+                            <button
+                                className="stepper__button"
+                                onClick={() => setEnfants(Math.max(0, enfants - 1))}
+                                disabled={enfants === 0}
+                                aria-label="Diminuer le nombre d'enfants"
+                            >
+                                −
+                            </button>
+                            <span className="stepper__value">{enfants}</span>
+                            <button
+                                className="stepper__button"
+                                onClick={() => setEnfants(enfants + 1)}
+                                aria-label="Augmenter le nombre d'enfants"
+                            >
+                                +
+                            </button>
                         </div>
                     </div>
-                    <p className="parts-badge">{resultat.parts} part{resultat.parts > 1 ? 's' : ''} fiscale{resultat.parts > 1 ? 's' : ''}</p>
+                    <p className="parts-badge" style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-brand-primary)', fontWeight: 600 }}>
+                        {resultat.parts} part{resultat.parts > 1 ? 's' : ''} fiscale{resultat.parts > 1 ? 's' : ''}
+                    </p>
                 </motion.section>
 
-                {/* View Mode Tabs */}
-                <div className="view-tabs">
+                {/* Visualization Tabs */}
+                <nav className="view-nav" aria-label="Vues détaillées">
                     <button
-                        className={`view-tab ${viewMode === 'chart' ? 'active' : ''}`}
+                        className={`view-nav__item ${viewMode === 'chart' ? 'view-nav__item--active' : ''}`}
                         onClick={() => setViewMode('chart')}
                     >
                         📊 Graphique
                     </button>
                     <button
-                        className={`view-tab ${viewMode === 'compare' ? 'active' : ''}`}
+                        className={`view-nav__item ${viewMode === 'compare' ? 'view-nav__item--active' : ''}`}
                         onClick={() => setViewMode('compare')}
                     >
                         🚀 Augmentation
                     </button>
                     <button
-                        className={`view-tab ${viewMode === 'employer' ? 'active' : ''}`}
+                        className={`view-nav__item ${viewMode === 'employer' ? 'view-nav__item--active' : ''}`}
                         onClick={() => setViewMode('employer')}
                     >
                         🏢 Employeur
                     </button>
-                </div>
+                </nav>
 
-                {/* Dynamic Content */}
+                {/* Dashboard Area */}
                 <AnimatePresence mode="wait">
                     {viewMode === 'chart' && (
-                        <motion.div
-                            key="chart"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                        >
+                        <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <SalaryChart
                                 netApresImpots={resultat.netApresImpots}
                                 cotisations={resultat.cotisations}
@@ -221,12 +266,7 @@ function App() {
                         </motion.div>
                     )}
                     {viewMode === 'compare' && (
-                        <motion.div
-                            key="compare"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                        >
+                        <motion.div key="compare" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <ComparisonMode
                                 currentBrut={resultat.brut}
                                 isCadre={isCadre}
@@ -237,12 +277,7 @@ function App() {
                         </motion.div>
                     )}
                     {viewMode === 'employer' && (
-                        <motion.div
-                            key="employer"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                        >
+                        <motion.div key="employer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <EmployerCost
                                 brutMensuel={resultat.brut}
                                 isCadre={isCadre}
@@ -251,64 +286,65 @@ function App() {
                     )}
                 </AnimatePresence>
 
-                {/* Results Monthly */}
-                <motion.section
-                    className="card glass results-card"
+                {/* Results Summary */}
+                <motion.article
+                    className="simulator-card simulator-card--glass results-display"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                 >
-                    <h3 className="section-title">📆 Mensuel</h3>
+                    <header className="simulator-card__header">
+                        <h3 className="simulator-card__title">📆 Mensuel</h3>
+                    </header>
 
-                    <div className="result-line">
-                        <span>Brut</span>
-                        <span className="value">{fmt(resultat.brut)} €</span>
+                    <div className="results-display__row">
+                        <span className="results-display__label">Brut</span>
+                        <span className="results-display__value">{fmt(resultat.brut)} €</span>
                     </div>
-                    <div className="result-line dim">
-                        <span>Cotisations ({resultat.tauxCotisations.toFixed(0)}%)</span>
-                        <span className="value">−{fmt(resultat.cotisations)} €</span>
+                    <div className="results-display__row results-display__row--dim">
+                        <span className="results-display__label">Cotisations ({resultat.tauxCotisations.toFixed(0)}%)</span>
+                        <span className="results-display__value">−{fmt(resultat.cotisations)} €</span>
                     </div>
-                    <div className="result-line">
-                        <span>Net avant impôts</span>
-                        <span className="value">{fmt(resultat.netAvantImpots)} €</span>
+                    <div className="results-display__row">
+                        <span className="results-display__label">Net avant impôts</span>
+                        <span className="results-display__value">{fmt(resultat.netAvantImpots)} €</span>
                     </div>
-                    <div className="result-line dim">
-                        <span>Impôt ({resultat.tauxImposition.toFixed(1)}%)</span>
-                        <span className="value">−{fmt(resultat.impotMensuel)} €</span>
+                    <div className="results-display__row results-display__row--dim">
+                        <span className="results-display__label">Impôt ({resultat.tauxImposition.toFixed(1)}%)</span>
+                        <span className="results-display__value">−{fmt(resultat.impotMensuel)} €</span>
                     </div>
 
-                    <div className="result-highlight">
-                        <span>💰 Net à payer</span>
-                        <span className="value">{fmt(resultat.netApresImpots)} €</span>
+                    <div className="results-display__highlight">
+                        <span className="results-display__highlight-label">💰 Net à payer</span>
+                        <output className="results-display__highlight-value">{fmt(resultat.netApresImpots)} €</output>
                     </div>
-                </motion.section>
+                </motion.article>
 
-                {/* Results Annual */}
-                <motion.section
-                    className="card glass results-card annual"
+                <motion.article
+                    className="simulator-card results-display results-display--annual"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
-                    <h3 className="section-title">📅 Annuel</h3>
-                    <div className="result-line">
-                        <span>Brut annuel</span>
-                        <span className="value">{fmt(resultat.brutAnnuel)} €</span>
+                    <header className="simulator-card__header">
+                        <h3 className="simulator-card__title">📅 Annuel</h3>
+                    </header>
+                    <div className="results-display__row">
+                        <span className="results-display__label">Brut annuel</span>
+                        <span className="results-display__value">{fmt(resultat.brutAnnuel)} €</span>
                     </div>
-                    <div className="result-line">
-                        <span>Net annuel</span>
-                        <span className="value">{fmt(resultat.netAnnuelApresImpots)} €</span>
+                    <div className="results-display__row">
+                        <span className="results-display__label">Net annuel</span>
+                        <span className="results-display__value">{fmt(resultat.netAnnuelApresImpots)} €</span>
                     </div>
-                </motion.section>
+                </motion.article>
             </main>
 
-            <footer className="footer">
-                <p>Estimation basée sur les barèmes officiels 2025</p>
-                <div className="made-by">
-                    <p>
-                        <span className="made-text">Made with</span>
-                        <span className="heart-emoji">❤️</span>
-                        <span className="by-text">by <strong>Hamza DJOUDI</strong></span>
+            <footer className="app-footer">
+                <p className="app-footer__legal">Estimation basée sur les barèmes officiels 2025</p>
+                <div className="app-footer__signature">
+                    <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
+                        Made with <span className="heart-emoji">❤️</span> by <strong>Hamza DJOUDI</strong>
                     </p>
                     <a href="https://djoudi.dev" target="_blank" rel="noopener" className="signature-link">djoudi.dev</a>
                 </div>
