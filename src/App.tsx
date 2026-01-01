@@ -1,5 +1,9 @@
-import { useState, useMemo } from 'react'
-import './App.css'
+import { useState, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { SalaryChart } from './components/SalaryChart'
+import { ComparisonMode } from './components/ComparisonMode'
+import { EmployerCost } from './components/EmployerCost'
+import './index.css'
 
 // Taux de cotisations France 2025 (moyenne estimée)
 const TAUX_NON_CADRE = 0.22
@@ -34,17 +38,31 @@ function calculerImpot(revenuNetImposable: number, parts: number): number {
     return impotParPart * parts
 }
 
+type ViewMode = 'simple' | 'chart' | 'compare' | 'employer'
+
 function App() {
     const [montant, setMontant] = useState('3000')
     const [isCadre, setIsCadre] = useState(false)
     const [mode, setMode] = useState<'brut' | 'net'>('brut')
     const [isMarried, setIsMarried] = useState(false)
     const [enfants, setEnfants] = useState(0)
+    const [viewMode, setViewMode] = useState<ViewMode>('chart')
+
+    const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
+    const parts = calculerParts(isMarried, enfants)
+
+    const calculerResultat = useCallback((brutInput: number) => {
+        const netAvantImpots = brutInput * (1 - taux)
+        const cotisations = brutInput - netAvantImpots
+        const netAnnuelAvantImpots = netAvantImpots * 12
+        const impotAnnuel = calculerImpot(netAnnuelAvantImpots, parts)
+        const impotMensuel = impotAnnuel / 12
+        const netApresImpots = netAvantImpots - impotMensuel
+        return { netApresImpots, cotisations, impotMensuel, netAvantImpots }
+    }, [taux, parts])
 
     const resultat = useMemo(() => {
         const valeur = parseFloat(montant.replace(/\s/g, '')) || 0
-        const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
-
         let brut: number, netAvantImpots: number, cotisations: number
 
         if (mode === 'brut') {
@@ -58,7 +76,6 @@ function App() {
         }
 
         const netAnnuelAvantImpots = netAvantImpots * 12
-        const parts = calculerParts(isMarried, enfants)
         const impotAnnuel = calculerImpot(netAnnuelAvantImpots, parts)
         const impotMensuel = impotAnnuel / 12
         const netApresImpots = netAvantImpots - impotMensuel
@@ -76,7 +93,7 @@ function App() {
             parts,
             tauxImposition
         }
-    }, [montant, isCadre, mode, isMarried, enfants])
+    }, [montant, taux, mode, parts])
 
     const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
@@ -84,8 +101,21 @@ function App() {
         <div className="app">
             {/* Hero */}
             <header className="hero">
-                <h1 className="brand">BrutNet</h1>
-                <p className="tagline">Simulateur de salaire France 2025</p>
+                <motion.h1
+                    className="brand"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    BrutNet
+                </motion.h1>
+                <motion.p
+                    className="tagline"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    Simulateur de salaire France 2025
+                </motion.p>
             </header>
 
             <main className="calculator">
@@ -100,7 +130,12 @@ function App() {
                 </div>
 
                 {/* Input Section */}
-                <section className="card input-card">
+                <motion.section
+                    className="card glass input-card"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
                     <label className="label">{mode === 'brut' ? 'Salaire brut' : 'Salaire net'} mensuel</label>
                     <div className="input-row">
                         <input
@@ -113,10 +148,15 @@ function App() {
                         />
                         <span className="unit">€/mois</span>
                     </div>
-                </section>
+                </motion.section>
 
                 {/* Options */}
-                <section className="card options-card">
+                <motion.section
+                    className="card glass options-card"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
                     <div className="option-row">
                         <span className="option-label">Statut</span>
                         <div className="toggle-group small">
@@ -140,10 +180,84 @@ function App() {
                         </div>
                     </div>
                     <p className="parts-badge">{resultat.parts} part{resultat.parts > 1 ? 's' : ''} fiscale{resultat.parts > 1 ? 's' : ''}</p>
-                </section>
+                </motion.section>
+
+                {/* View Mode Tabs */}
+                <div className="view-tabs">
+                    <button
+                        className={`view-tab ${viewMode === 'chart' ? 'active' : ''}`}
+                        onClick={() => setViewMode('chart')}
+                    >
+                        📊 Graphique
+                    </button>
+                    <button
+                        className={`view-tab ${viewMode === 'compare' ? 'active' : ''}`}
+                        onClick={() => setViewMode('compare')}
+                    >
+                        🚀 Augmentation
+                    </button>
+                    <button
+                        className={`view-tab ${viewMode === 'employer' ? 'active' : ''}`}
+                        onClick={() => setViewMode('employer')}
+                    >
+                        🏢 Employeur
+                    </button>
+                </div>
+
+                {/* Dynamic Content */}
+                <AnimatePresence mode="wait">
+                    {viewMode === 'chart' && (
+                        <motion.div
+                            key="chart"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                        >
+                            <SalaryChart
+                                netApresImpots={resultat.netApresImpots}
+                                cotisations={resultat.cotisations}
+                                impot={resultat.impotMensuel}
+                            />
+                        </motion.div>
+                    )}
+                    {viewMode === 'compare' && (
+                        <motion.div
+                            key="compare"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                        >
+                            <ComparisonMode
+                                currentBrut={resultat.brut}
+                                isCadre={isCadre}
+                                isMarried={isMarried}
+                                enfants={enfants}
+                                calculerResultat={calculerResultat}
+                            />
+                        </motion.div>
+                    )}
+                    {viewMode === 'employer' && (
+                        <motion.div
+                            key="employer"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                        >
+                            <EmployerCost
+                                brutMensuel={resultat.brut}
+                                isCadre={isCadre}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Results Monthly */}
-                <section className="card results-card">
+                <motion.section
+                    className="card glass results-card"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                >
                     <h3 className="section-title">📆 Mensuel</h3>
 
                     <div className="result-line">
@@ -167,10 +281,15 @@ function App() {
                         <span>💰 Net à payer</span>
                         <span className="value">{fmt(resultat.netApresImpots)} €</span>
                     </div>
-                </section>
+                </motion.section>
 
                 {/* Results Annual */}
-                <section className="card results-card annual">
+                <motion.section
+                    className="card glass results-card annual"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                >
                     <h3 className="section-title">📅 Annuel</h3>
                     <div className="result-line">
                         <span>Brut annuel</span>
@@ -180,7 +299,7 @@ function App() {
                         <span>Net annuel</span>
                         <span className="value">{fmt(resultat.netAnnuelApresImpots)} €</span>
                     </div>
-                </section>
+                </motion.section>
             </main>
 
             <footer className="footer">
