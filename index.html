@@ -12,17 +12,23 @@
     <meta property="og:description"
         content="Calculez votre salaire net en 2 secondes. Gratuit, précis, sans inscription." />
     <meta property="og:type" content="website" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
     <title>BrutNet - Calculateur Salaire Brut → Net | France 2025</title>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW Registered', reg.scope))
+                    .catch(err => console.error('SW Failed', err));
+            });
+        }
+    </script>
 </body>
 
 </html>

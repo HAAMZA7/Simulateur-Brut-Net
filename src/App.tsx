@@ -186,7 +186,11 @@ function App() {
             <footer className="footer">
                 <p>Estimation basée sur les barèmes officiels 2025</p>
                 <div className="made-by">
-                    <p>Made with <span className="heart-emoji">❤️</span> by <strong>Hamza DJOUDI</strong></p>
+                    <p>
+                        <span className="made-text">Made with</span>
+                        <span className="heart-emoji">❤️</span>
+                        <span className="by-text">by <strong>Hamza DJOUDI</strong></span>
+                    </p>
                     <a href="https://djoudi.dev" target="_blank" rel="noopener" className="signature-link">djoudi.dev</a>
                 </div>
             </footer>
