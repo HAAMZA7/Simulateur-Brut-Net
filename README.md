@@ -1,59 +1,45 @@
-# BrutNet 💰
+# 💰 Simulateur Brut / Net
 
-**Calculateur de salaire Brut ↔ Net instantané pour la France**
+> **Calculez votre salaire net en un clic**
 
-![BrutNet Screenshot](public/logo.png)
+Application web permettant de convertir un salaire brut en net (et inversement) en prenant en compte les charges sociales françaises.
 
-## 🚀 Fonctionnalités
+🔗 **[Essayer l'application](https://beige-armadillo-182151.hostingersite.com/)**
 
-- ⚡ **Calcul instantané** - Résultats en temps réel
-- 🔄 **Double sens** - Brut → Net ou Net → Brut  
-- 👔 **Statut** - Cadre / Non-cadre
-- 📱 **Mobile-first** - Design optimisé pour smartphone
-- 🌙 **Dark mode** - Interface moderne et élégante
-- 💚 **Résultats clairs** - Net mis en évidence
-- 🎯 **Boutons rapides** - Montants courants (1500€ - 5000€)
+## ✨ Fonctionnalités
 
-## 🛠️ Tech Stack
+- 💵 Conversion **Brut → Net** et **Net → Brut**
+- 📊 Détail des **charges salariales** et **patronales**
+- 📈 Visualisation graphique avec **Chart.js**
+- 📄 Export **PDF** du récapitulatif
+- 📱 **Responsive** : fonctionne sur mobile et desktop
 
-- **React 19** + TypeScript
-- **Vite** - Build ultra-rapide
-- **CSS** - Design custom mobile-first
+## 🧮 Charges prises en compte
 
-## 📦 Installation
+| Type | Détail |
+|------|--------|
+| **Salariales** | CSG, CRDS, Retraite, Chômage... |
+| **Patronales** | Assurance maladie, Allocations familiales... |
+
+## 🛠️ Stack Technique
+
+- **TypeScript** + **Vite**
+- **Chart.js** pour les graphiques
+- **jsPDF** pour l'export PDF
+- **Hébergement** : Hostinger
+
+## 🚀 Installation locale
 
 ```bash
-# Clone
-git clone https://github.com/HAAMZA7/Simulateur-Brut-Net.git
-cd Simulateur-Brut-Net
-
-# Install
 npm install
-
-# Dev
 npm run dev
-
-# Build
-npm run build
 ```
 
-## 🌐 Déploiement
+## 📧 Contact
 
-Le dossier `dist/` contient les fichiers buildés prêts pour le déploiement.
-
-## 📊 Taux utilisés (France 2025)
-
-| Statut | Cotisations |
-|--------|-------------|
-| Non-cadre | ~23% |
-| Cadre | ~25% |
-
-> ⚠️ Ces taux sont des moyennes. Le montant réel dépend de votre convention collective.
-
-## 📄 Licence
-
-MIT - Libre d'utilisation
+- **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
+- **Site** : [Simulateur](https://beige-armadillo-182151.hostingersite.com/)
 
 ---
 
-**Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)**
+Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)
