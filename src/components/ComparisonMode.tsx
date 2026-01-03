@@ -41,18 +41,18 @@ export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calcu
             viewport={{ once: true }}
         >
             <h3 className="apple-card__title">🚀 Simuler une augmentation</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-                {comparisons.map((c, i) => (
+            <div className="simulation-grid">
+                {comparisons.map((c) => (
                     <motion.div
                         key={c.pct}
-                        style={{ background: 'var(--color-bg-secondary)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                        className="simulation-card"
                         whileHover={{ scale: 1.02 }}
                     >
-                        <span style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-status-success)', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', alignSelf: 'flex-start' }}>+{c.pct}%</span>
-                        <div>
-                            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{fmt(c.newBrut)} € brut</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{fmt(c.newNet)} € net</div>
-                            <div style={{ fontSize: '12px', color: 'var(--color-status-success)', fontWeight: 600 }}>+{fmt(c.delta)} €/mois</div>
+                        <span className="simulation-badge">+{c.pct}%</span>
+                        <div className="simulation-details">
+                            <div className="simulation-brut">{fmt(c.newBrut)} € brut</div>
+                            <div className="simulation-net">{fmt(c.newNet)} € net</div>
+                            <div className="simulation-delta">+{fmt(c.delta)} €/mois</div>
                         </div>
                     </motion.div>
                 ))}
