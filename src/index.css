@@ -254,3 +254,33 @@ body {
         padding: 24px;
     }
 }
+
+/* Signature Link */
+.signature-link {
+    background: linear-gradient(90deg, var(--color-brand), #22c55e, var(--color-brand));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+    text-decoration: none;
+    animation: gradient-shift 3s ease infinite;
+}
+
+.signature-link:hover {
+    animation-duration: 0.5s;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% center;
+    }
+
+    50% {
+        background-position: 100% center;
+    }
+
+    100% {
+        background-position: 0% center;
+    }
+}

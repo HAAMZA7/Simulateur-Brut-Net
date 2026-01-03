@@ -227,7 +227,17 @@ function App() {
 
             <footer className="text-center mt-40" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
                 <p>Simulateur basé sur les lois de finances 2025. Précision indicative.</p>
-                <p style={{ marginTop: '12px' }}>BrutNet par L'Atelier Web Rouen</p>
+                <p style={{ marginTop: '16px' }}>
+                    Développé par{' '}
+                    <a
+                        href="https://djoudi.dev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="signature-link"
+                    >
+                        Hamza DJOUDI
+                    </a>
+                </p>
             </footer>
         </div>
     )
