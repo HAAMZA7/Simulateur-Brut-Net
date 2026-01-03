@@ -225,19 +225,23 @@ function App() {
                 </motion.section>
             </main>
 
-            <footer className="text-center mt-40" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
-                <p>Simulateur basé sur les lois de finances 2025. Précision indicative.</p>
-                <p style={{ marginTop: '16px' }}>
-                    Développé par{' '}
-                    <a
-                        href="https://djoudi.dev"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="signature-link"
-                    >
-                        Hamza DJOUDI
-                    </a>
+            <footer className="signature-container">
+                <p style={{ color: 'var(--color-text-tertiary)', fontSize: '13px', marginBottom: '16px' }}>
+                    Simulateur basé sur les lois de finances 2025. Précision indicative.
                 </p>
+                <div className="signature-content">
+                    <span className="made-text">Made with</span>
+                    <span className="heart">❤️</span>
+                    <span className="by-text">by <strong>Hamza DJOUDI</strong></span>
+                </div>
+                <a
+                    href="https://djoudi.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="signature-link"
+                >
+                    djoudi.dev
+                </a>
             </footer>
         </div>
     )
