@@ -246,12 +246,108 @@ body {
 }
 
 @media (max-width: 600px) {
-    .apple-input {
-        font-size: 56px;
+
+    /* Hero */
+    .hero-section {
+        padding: 40px 0 40px;
     }
 
+    .hero-title {
+        font-size: 28px;
+        line-height: 1.2;
+    }
+
+    .hero-label {
+        font-size: 12px;
+        margin-bottom: 24px;
+    }
+
+    .apple-input {
+        font-size: 48px;
+    }
+
+    .apple-input-unit {
+        font-size: 16px;
+        margin-top: 0;
+    }
+
+    /* Header */
+    .apple-header {
+        padding: 24px 0 16px;
+    }
+
+    .apple-header__logo {
+        font-size: 20px;
+    }
+
+    /* Cards */
     .apple-card {
-        padding: 24px;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+    }
+
+    .apple-card__title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    /* Toggle */
+    .apple-toggle {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .apple-toggle__btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    /* Lists */
+    .apple-list-row {
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 0;
+    }
+
+    .apple-list-label {
+        font-size: 13px;
+    }
+
+    .apple-list-value {
+        font-size: 15px;
+    }
+
+    .apple-list-row--total .apple-list-value {
+        font-size: 20px;
+    }
+
+    /* Section divider */
+    .section-divider {
+        margin: 32px 0;
+    }
+
+    /* Grids in config */
+    .apple-card div[style*="grid-template-columns"] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 24px !important;
+    }
+
+    /* Container padding */
+    .app-container {
+        padding: 0 16px 80px;
+    }
+
+    /* Utilities */
+    .mt-40 {
+        margin-top: 24px;
+    }
+
+    /* Signature */
+    .signature-container {
+        padding: 2rem 1rem;
+        margin-top: 32px;
     }
 }
 
