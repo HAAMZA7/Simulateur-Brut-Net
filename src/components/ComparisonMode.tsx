@@ -35,27 +35,24 @@ export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calcu
 
     return (
         <motion.div
-            className="comparison-card"
+            className="apple-card"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
         >
-            <h3 className="comparison-title">🚀 Simuler une augmentation</h3>
-            <div className="comparison-grid">
+            <h3 className="apple-card__title">🚀 Simuler une augmentation</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                 {comparisons.map((c, i) => (
                     <motion.div
                         key={c.pct}
-                        className="comparison-item"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.08 }}
+                        style={{ background: 'var(--color-bg-secondary)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}
                         whileHover={{ scale: 1.02 }}
                     >
-                        <span className="comparison-badge">+{c.pct}%</span>
-                        <div className="comparison-details">
-                            <span className="comparison-brut">{fmt(c.newBrut)} € brut</span>
-                            <span className="comparison-net">{fmt(c.newNet)} € net</span>
-                            <span className="comparison-delta">+{fmt(c.delta)} €/mois</span>
+                        <span style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-status-success)', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', alignSelf: 'flex-start' }}>+{c.pct}%</span>
+                        <div>
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{fmt(c.newBrut)} € brut</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{fmt(c.newNet)} € net</div>
+                            <div style={{ fontSize: '12px', color: 'var(--color-status-success)', fontWeight: 600 }}>+{fmt(c.delta)} €/mois</div>
                         </div>
                     </motion.div>
                 ))}

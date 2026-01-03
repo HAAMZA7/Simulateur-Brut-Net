@@ -21,10 +21,8 @@ export function SalaryChart({ netApresImpots, cotisations, impot }: SalaryChartP
 
     return (
         <motion.div
-            className="chart-container"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            className="apple-card"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
         >
             <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
@@ -43,35 +41,43 @@ export function SalaryChart({ netApresImpots, cotisations, impot }: SalaryChartP
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number) => `${fmt(value)} €`}
+                        formatter={(value: any) => [`${fmt(Number(value))} €`]}
                         contentStyle={{
-                            background: 'rgba(24, 24, 27, 0.95)',
-                            border: '1px solid #27272a',
-                            borderRadius: '8px',
-                            color: '#fafafa'
+                            backgroundColor: 'var(--color-surface-card)',
+                            borderColor: 'var(--color-border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            color: 'var(--color-text-primary)',
+                            boxShadow: 'var(--effect-shadow-card)'
                         }}
+                        itemStyle={{ color: 'var(--color-text-primary)' }}
+                        labelStyle={{ color: 'var(--color-text-secondary)' }}
                     />
                 </PieChart>
             </ResponsiveContainer>
 
-            <div className="chart-center">
-                <span className="chart-total">{fmt(total)} €</span>
-                <span className="chart-label">Brut</span>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -150%)', textAlign: 'center', pointerEvents: 'none' }}>
+                <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{fmt(total)} €</span>
+                <span style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', fontWeight: 600 }}>Brut</span>
             </div>
 
-            <div className="chart-legend">
+            <div style={{ width: '100%', marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {data.map((item, i) => (
                     <motion.div
                         key={item.name}
-                        className="legend-item"
+                        className="apple-list-row"
+                        style={{ padding: '8px 0', borderBottom: '1px solid var(--color-bg-secondary)' }}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <span className="legend-dot" style={{ background: item.color }} />
-                        <span className="legend-label">{item.name}</span>
-                        <span className="legend-value">{fmt(item.value)} €</span>
-                        <span className="legend-percent">({((item.value / total) * 100).toFixed(0)}%)</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: item.color }} />
+                            <span className="apple-list-label">{item.name}</span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <span className="apple-list-value">{fmt(item.value)} €</span>
+                            <span style={{ marginLeft: '8px', fontSize: '12px', color: 'var(--color-text-tertiary)' }}>({((item.value / total) * 100).toFixed(0)}%)</span>
+                        </div>
                     </motion.div>
                 ))}
             </div>
