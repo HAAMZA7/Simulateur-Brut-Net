@@ -1,32 +1,33 @@
-# 💰 Simulateur Brut / Net
+# 💰 BrutNet - Simulateur Brut / Net
 
 > **Calculez votre salaire net en un clic**
 
-Application web permettant de convertir un salaire brut en net (et inversement) en prenant en compte les charges sociales françaises.
+Application web permettant de convertir un salaire brut en net (et inversement) en prenant en compte les charges sociales françaises 2025.
 
-🔗 **[Essayer l'application](https://beige-armadillo-182151.hostingersite.com/)**
+🔗 **[Essayer l'application](https://brutnet.vercel.app/)**
 
 ## ✨ Fonctionnalités
 
 - 💵 Conversion **Brut → Net** et **Net → Brut**
 - 📊 Détail des **charges salariales** et **patronales**
-- 📈 Visualisation graphique avec **Chart.js**
-- 📄 Export **PDF** du récapitulatif
+- 📈 Visualisation graphique (Donut Chart)
+- 💼 Calcul du **Coût Employeur**
+- 🌙 Mode sombre / clair
 - 📱 **Responsive** : fonctionne sur mobile et desktop
 
 ## 🧮 Charges prises en compte
 
 | Type | Détail |
 |------|--------|
-| **Salariales** | CSG, CRDS, Retraite, Chômage... |
-| **Patronales** | Assurance maladie, Allocations familiales... |
+| **Salariales** | CSG, CRDS, Retraite, Chômage... (~22%) |
+| **Patronales** | Assurance maladie, Allocations familiales... (~42%) |
 
 ## 🛠️ Stack Technique
 
-- **TypeScript** + **Vite**
-- **Chart.js** pour les graphiques
-- **jsPDF** pour l'export PDF
-- **Hébergement** : Hostinger
+- **React** + **TypeScript** + **Vite**
+- **Recharts** pour les graphiques
+- **Tailwind CSS** pour le design
+- **Hébergement** : Vercel
 
 ## 🚀 Installation locale
 
@@ -38,7 +39,7 @@ npm run dev
 ## 📧 Contact
 
 - **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [Simulateur](https://beige-armadillo-182151.hostingersite.com/)
+- **Site** : [brutnet.vercel.app](https://brutnet.vercel.app/)
 
 ---
 
