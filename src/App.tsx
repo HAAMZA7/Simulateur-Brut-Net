@@ -52,6 +52,8 @@ function App() {
     const [mode, setMode] = useState<'brut' | 'net'>('brut')
     const [isMarried, setIsMarried] = useState(false)
     const [enfants, setEnfants] = useState(0)
+    const [isAnnual, setIsAnnual] = useState(false)
+    const [is13thMonth, setIs13thMonth] = useState(false)
 
     const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
     const parts = calculerParts(isMarried, enfants)
@@ -68,16 +70,20 @@ function App() {
 
     const resultat = useMemo(() => {
         const valeur = parseFloat(montant.replace(/\s/g, '')) || 0
-        let brut: number, netAvantImpots: number, cotisations: number
+        let brutMensuel: number, netAvantImpots: number, cotisations: number
+
+        // Convertir en mensuel si annuel
+        const diviseur = is13thMonth ? 13 : 12
+        const valeurMensuelle = isAnnual ? valeur / diviseur : valeur
 
         if (mode === 'brut') {
-            brut = valeur
-            netAvantImpots = valeur * (1 - taux)
-            cotisations = brut - netAvantImpots
+            brutMensuel = valeurMensuelle
+            netAvantImpots = valeurMensuelle * (1 - taux)
+            cotisations = brutMensuel - netAvantImpots
         } else {
-            netAvantImpots = valeur
-            brut = valeur / (1 - taux)
-            cotisations = brut - netAvantImpots
+            netAvantImpots = valeurMensuelle
+            brutMensuel = valeurMensuelle / (1 - taux)
+            cotisations = brutMensuel - netAvantImpots
         }
 
         const netAnnuelAvantImpots = netAvantImpots * 12
@@ -86,16 +92,22 @@ function App() {
         const netApresImpots = netAvantImpots - impotMensuel
         const tauxImposition = netAnnuelAvantImpots > 0 ? (impotAnnuel / netAnnuelAvantImpots) * 100 : 0
 
+        // Calculer annuel
+        const brutAnnuel = brutMensuel * (is13thMonth ? 13 : 12)
+        const netApresImpotsAnnuel = netApresImpots * 12
+
         return {
-            brut,
+            brut: brutMensuel,
+            brutAnnuel,
             netAvantImpots,
             cotisations,
             tauxCotisations: taux * 100,
             impotMensuel,
             netApresImpots,
+            netApresImpotsAnnuel,
             tauxImposition
         }
-    }, [montant, taux, mode, parts])
+    }, [montant, taux, mode, parts, isAnnual, is13thMonth])
 
     const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
@@ -127,6 +139,13 @@ function App() {
                         Calculez votre salaire net
                     </motion.h1>
                     <span className="hero-label">Simulateur intelligent • France 2025</span>
+
+                    {/* Toggle Mensuel/Annuel */}
+                    <div className="apple-toggle" style={{ marginBottom: '24px' }}>
+                        <button className={`apple-toggle__btn ${!isAnnual ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsAnnual(false)}>Mensuel</button>
+                        <button className={`apple-toggle__btn ${isAnnual ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsAnnual(true)}>Annuel</button>
+                    </div>
+
                     <div className="apple-input-group">
                         <input
                             type="text"
@@ -135,13 +154,25 @@ function App() {
                             className="apple-input"
                             autoFocus
                         />
-                        <span className="apple-input-unit">€ / mois en {mode}</span>
+                        <span className="apple-input-unit">€ / {isAnnual ? 'an' : 'mois'} en {mode}</span>
                     </div>
 
                     <div className="apple-toggle mt-40">
                         <button className={`apple-toggle__btn ${mode === 'brut' ? 'apple-toggle__btn--active' : ''}`} onClick={() => setMode('brut')}>Brut</button>
                         <button className={`apple-toggle__btn ${mode === 'net' ? 'apple-toggle__btn--active' : ''}`} onClick={() => setMode('net')}>Net</button>
                     </div>
+
+                    {/* Résultat Principal - Toujours visible */}
+                    <motion.div
+                        className="result-highlight"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                    >
+                        <span className="result-highlight__label">Net après impôts</span>
+                        <span className="result-highlight__value">{fmt(resultat.netApresImpots)} €<span className="result-highlight__suffix">/mois</span></span>
+                        <span className="result-highlight__annual">{fmt(resultat.netApresImpotsAnnuel)} €/an</span>
+                    </motion.div>
                 </section>
 
                 <div className="section-divider" />
@@ -159,13 +190,20 @@ function App() {
                         </div>
                         <div>
                             <span className="hero-label" style={{ fontSize: '12px' }}>VOTRE FAMILLE</span>
-                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                                 <button className={`apple-toggle__btn ${isMarried ? 'apple-toggle__btn--active' : ''}`} style={{ background: 'var(--color-bg-secondary)' }} onClick={() => setIsMarried(!isMarried)}>{isMarried ? 'Couple' : 'Seul'}</button>
                                 <div className="apple-toggle" style={{ gap: '12px', padding: '4px 12px' }}>
-                                    <button onClick={() => setEnfants(Math.max(0, enfants - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>-</button>
-                                    <span style={{ fontWeight: 600 }}>{enfants}</span>
-                                    <button onClick={() => setEnfants(enfants + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>+</button>
+                                    <button onClick={() => setEnfants(Math.max(0, enfants - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-primary)' }}>-</button>
+                                    <span style={{ fontWeight: 600 }}>{enfants} enfant{enfants > 1 ? 's' : ''}</span>
+                                    <button onClick={() => setEnfants(enfants + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-primary)' }}>+</button>
                                 </div>
+                            </div>
+                            {/* Option 13ème mois */}
+                            <div style={{ marginTop: '16px' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={is13thMonth} onChange={(e) => setIs13thMonth(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-brand)' }} />
+                                    <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>13ème mois</span>
+                                </label>
                             </div>
                         </div>
                     </div>
