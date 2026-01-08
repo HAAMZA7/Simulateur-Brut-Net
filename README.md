@@ -4,7 +4,7 @@
 
 Application web permettant de convertir un salaire brut en net (et inversement) en prenant en compte les charges sociales françaises 2025.
 
-🔗 **[Essayer l'application](https://brutnet.vercel.app/)**
+🔗 **[Essayer l'application](https://brutnet.djoudi.dev/)**
 
 ## ✨ Fonctionnalités
 
@@ -39,7 +39,7 @@ npm run dev
 ## 📧 Contact
 
 - **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [brutnet.vercel.app](https://brutnet.vercel.app/)
+- **Site** : [brutnet.djoudi.dev](https://brutnet.djoudi.dev/)
 
 ---
 
