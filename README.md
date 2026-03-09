@@ -1,52 +1,41 @@
-# 💰 BrutNet - Simulateur Brut / Net
+# Simulateur Brut Net
 
-> **Calculez votre salaire net en un clic**
+Application web de conversion salaire brut/net, avec detail des charges salariales et patronales.
 
-Application web permettant de convertir un salaire brut en net (et inversement) en prenant en compte les charges sociales françaises 2025.
+[Voir l'application](https://brutnet.djoudi.dev/)
 
-🔗 **[Essayer l'application](https://brutnet.djoudi.dev/)**
+## Ce que fait le projet
 
-## ✨ Fonctionnalités
+- conversion brut vers net
+- conversion net vers brut
+- estimation du cout employeur
+- detail des charges
+- visualisation des resultats
+- interface responsive
 
-- 💵 Conversion **Brut → Net** et **Net → Brut**
-- 📊 Détail des **charges salariales** et **patronales**
-- 📈 Visualisation graphique (Donut Chart)
-- 💼 Calcul du **Coût Employeur**
-- 🌙 Mode sombre / clair
-- 📱 **Responsive** : fonctionne sur mobile et desktop
+## Stack
 
-## 🧮 Charges prises en compte
+- React
+- TypeScript
+- Vite
+- Recharts
 
-| Type | Détail |
-|------|--------|
-| **Salariales** | CSG, CRDS, Retraite, Chômage... (~22%) |
-| **Patronales** | Assurance maladie, Allocations familiales... (~42%) |
-
-## 🛠️ Stack Technique
-
-- **React** + **TypeScript** + **Vite**
-- **Recharts** pour les graphiques
-- **Tailwind CSS** pour le design
-- **Hébergement** : Vercel
-
-## 🚀 Installation locale
+## Lancer le projet
 
 ```bash
+git clone https://github.com/HAAMZA7/Simulateur-Brut-Net.git
+cd Simulateur-Brut-Net
 npm install
 npm run dev
 ```
 
-## 📧 Contact
+## Scripts utiles
 
-- **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [brutnet.djoudi.dev](https://brutnet.djoudi.dev/)
+- `npm run dev`
+- `npm run build`
+- `npm run preview`
 
----
+## Auteur
 
-## 📄 Licence
-
-© 2025 Hamza DJOUDI - Tous droits réservés.
-
----
-
-Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)
+- Site : [djoudi.dev](https://djoudi.dev)
+- Demo : [brutnet.djoudi.dev](https://brutnet.djoudi.dev/)
