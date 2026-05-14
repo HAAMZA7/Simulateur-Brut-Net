@@ -42,6 +42,7 @@ type Theme = 'dark' | 'light'
 const THEME_STORAGE_KEY = 'brutnet-theme'
 
 function App() {
+    const [isDemoMode, setIsDemoMode] = useState(false)
     const [theme, setTheme] = useState<Theme>(() => {
         if (typeof window === 'undefined') return 'light'
 
@@ -148,19 +149,30 @@ function App() {
         <div className="app-container">
             <header className="apple-header">
                 <span className="apple-header__logo">BrutNet</span>
-                <button
-                    onClick={toggleTheme}
-                    className="apple-toggle__btn"
-                    style={{ fontSize: '20px' }}
-                    aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
-                >
-                    {theme === 'dark' ? '☀️' : '🌙'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                        type="button"
+                        onClick={() => setIsDemoMode(v => !v)}
+                        className={`apple-toggle__btn ${isDemoMode ? 'apple-toggle__btn--active' : ''}`}
+                        aria-label="Activer le mode démo"
+                    >
+                        Demo
+                    </button>
+                    <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="apple-toggle__btn"
+                        style={{ fontSize: '20px' }}
+                        aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+                    >
+                        {theme === 'dark' ? '☀️' : '🌙'}
+                    </button>
+                </div>
             </header>
 
             <main>
                 {/* Hero: Focal Entry */}
-                <section className="hero-section">
+                <section className={`hero-section ${isDemoMode ? 'hero-section--demo' : ''}`}>
                     <motion.h1
                         className="hero-title"
                         initial={{ opacity: 0, y: 20 }}
@@ -170,6 +182,16 @@ function App() {
                         Calculez votre salaire net
                     </motion.h1>
                     <span className="hero-label">Simulateur intelligent • France 2025</span>
+                    {isDemoMode && (
+                        <motion.span
+                            className="demo-badge"
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35 }}
+                        >
+                            Mode Présentation activé
+                        </motion.span>
+                    )}
 
                     {/* Toggle Mensuel/Annuel */}
                     <div className="apple-toggle" style={{ marginBottom: '24px' }}>

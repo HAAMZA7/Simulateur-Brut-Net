@@ -66,6 +66,17 @@ input {
 .hero-section {
     text-align: center;
     padding: 26px 0 30px;
+    position: relative;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    inset: -24px -20px auto;
+    height: 360px;
+    background: radial-gradient(circle at 50% 0%, rgba(51, 119, 255, 0.14), transparent 65%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 .hero-title {
@@ -82,6 +93,22 @@ input {
     font-size: 12px;
     letter-spacing: 0.2em;
     color: var(--text-soft);
+}
+
+.hero-section--demo {
+    animation: hero-breathe 4s ease-in-out infinite;
+}
+
+.demo-badge {
+    margin-top: 14px;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--brand);
+    background: var(--brand-soft);
 }
 
 .apple-input-group {
@@ -115,6 +142,11 @@ input {
     background: var(--surface);
     backdrop-filter: blur(20px);
     box-shadow: var(--shadow);
+}
+
+.result-highlight:hover {
+    transform: translateY(-1px);
+    transition: transform 0.25s ease;
 }
 
 .result-highlight__label {
@@ -304,6 +336,22 @@ input {
         font-size: 30px;
     }
 
+    .hero-section {
+        padding-top: 8px;
+    }
+
+    .hero-title {
+        font-size: clamp(38px, 13vw, 56px);
+    }
+
+    .apple-input {
+        font-size: clamp(56px, 16vw, 84px);
+    }
+
+    .apple-input-unit {
+        font-size: 20px;
+    }
+
     .apple-card {
         padding: 20px;
         border-radius: 22px;
@@ -319,5 +367,14 @@ input {
 
     .simulation-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@keyframes hero-breathe {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-2px);
     }
 }
