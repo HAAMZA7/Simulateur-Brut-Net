@@ -70,6 +70,7 @@ function App() {
     const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
     const parts = calculerParts(isMarried, enfants)
     const annualFactor = is13thMonth ? 13 : 12
+    const inputFactor = isAnnual ? annualFactor : 1
     const formatMoney = useCallback((n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }), [])
 
     const calculerResultat = useCallback((brutInput: number) => {
@@ -89,7 +90,7 @@ function App() {
         let netAvantImpots = 0
         let cotisations = 0
 
-        const valeurMensuelle = annualFactor > 0 ? saisie / annualFactor : saisie
+        const valeurMensuelle = inputFactor > 0 ? saisie / inputFactor : saisie
 
         if (mode === 'brut') {
             brutMensuel = valeurMensuelle
@@ -121,7 +122,20 @@ function App() {
             netApresImpotsAnnuel,
             tauxImposition
         }
-    }, [montant, taux, mode, parts, annualFactor, isAnnual])
+    }, [montant, taux, mode, parts, annualFactor, inputFactor])
+
+    const insights = useMemo(() => {
+        const netAvant = resultat.netAvantImpots
+        const netApres = resultat.netApresImpots
+        const gainDisponible = netAvant > 0 ? (netApres / netAvant) * 100 : 0
+        const effortFiscal = 100 - gainDisponible
+
+        return {
+            gainDisponible,
+            effortFiscal,
+            economiePotentielle: Math.max(0, resultat.impotMensuel * 0.08), // ordre de grandeur pédagogique
+        }
+    }, [resultat])
 
     const animProps: any = {
         initial: { opacity: 0, y: 30 },
@@ -191,6 +205,14 @@ function App() {
                         <span className="result-highlight__label">Net après impôts</span>
                         <span className="result-highlight__value">{formatMoney(resultat.netApresImpots)} €<span className="result-highlight__suffix">/mois</span></span>
                         <span className="result-highlight__annual">{formatMoney(resultat.netApresImpotsAnnuel)} €/an</span>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '8px' }}>
+                            <span style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '999px', background: 'rgba(34,197,94,0.12)', color: '#22c55e', fontWeight: 700 }}>
+                                Pouvoir d’achat: {insights.gainDisponible.toFixed(1)}%
+                            </span>
+                            <span style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '999px', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontWeight: 700 }}>
+                                Effort fiscal & social: {insights.effortFiscal.toFixed(1)}%
+                            </span>
+                        </div>
                     </motion.div>
                 </section>
 
@@ -243,6 +265,10 @@ function App() {
                         <span className="apple-list-value">{formatMoney(resultat.brut)} €</span>
                     </div>
                     <div className="apple-list-row">
+                        <span className="apple-list-label">Salaire Brut annuel ({annualFactor} mois)</span>
+                        <span className="apple-list-value">{formatMoney(resultat.brutAnnuel)} €</span>
+                    </div>
+                    <div className="apple-list-row">
                         <span className="apple-list-label">Cotisations ({resultat.tauxCotisations}%)</span>
                         <span className="apple-list-value">-{formatMoney(resultat.cotisations)} €</span>
                     </div>
@@ -253,6 +279,10 @@ function App() {
                     <div className="apple-list-row apple-list-row--total">
                         <span className="apple-list-label" style={{ fontSize: '20px', fontWeight: 600 }}>Net après impôts</span>
                         <span className="apple-list-value">{formatMoney(resultat.netApresImpots)} €/mois</span>
+                    </div>
+                    <div className="apple-list-row">
+                        <span className="apple-list-label">Potentiel d’optimisation (indicatif)</span>
+                        <span className="apple-list-value" style={{ color: '#22c55e' }}>+{formatMoney(insights.economiePotentielle)} €/mois</span>
                     </div>
                 </motion.section>
 
