@@ -3,16 +3,19 @@ import { motion } from 'framer-motion';
 interface EmployerCostProps {
     brutMensuel: number;
     isCadre: boolean;
+    annualFactor: number;
 }
 
 // Taux charges patronales moyennes France 2025
 const TAUX_PATRONAL_NON_CADRE = 0.42;
 const TAUX_PATRONAL_CADRE = 0.45;
 
-export function EmployerCost({ brutMensuel, isCadre }: EmployerCostProps) {
+export function EmployerCost({ brutMensuel, isCadre, annualFactor }: EmployerCostProps) {
     const taux = isCadre ? TAUX_PATRONAL_CADRE : TAUX_PATRONAL_NON_CADRE;
     const chargesPatronales = brutMensuel * taux;
     const coutTotal = brutMensuel + chargesPatronales;
+    const coutParEuroBrut = brutMensuel > 0 ? coutTotal / brutMensuel : 0;
+    const coutAnnuel = coutTotal * annualFactor;
 
     const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
 
@@ -39,10 +42,14 @@ export function EmployerCost({ brutMensuel, isCadre }: EmployerCostProps) {
                     <span className="apple-list-label" style={{ fontWeight: 700 }}>Coût total employeur</span>
                     <span className="apple-list-value" style={{ fontSize: '20px', color: 'var(--color-brand)' }}>{fmt(coutTotal)} €</span>
                 </div>
+                <div className="apple-list-row" style={{ border: 'none', paddingBottom: 0 }}>
+                    <span className="apple-list-label">Estimation annuelle</span>
+                    <span className="apple-list-value">{fmt(coutAnnuel)} €</span>
+                </div>
             </div>
 
             <p style={{ marginTop: '24px', fontSize: '12px', color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: 1.5, background: 'rgba(0,113,227,0.05)', padding: '12px', borderRadius: '12px' }}>
-                Pour chaque 1 € net que vous recevez, votre employeur dépense environ {((coutTotal / (brutMensuel * (1 - (isCadre ? 0.25 : 0.22)))).toFixed(2))} €
+                Pour 1 € de brut, votre employeur dépense environ {coutParEuroBrut > 0 ? `${coutParEuroBrut.toFixed(2)} €` : '—'}
             </p>
         </motion.div>
     );

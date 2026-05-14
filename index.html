@@ -8,27 +8,20 @@
         content="BrutNet Premium - Le simulateur de salaire le plus avancé. Graphiques interactifs, comparatif avant/après augmentation et coût employeur. Précis France 2025." />
     <meta name="keywords"
         content="brut net, salaire 2025, simulation augmentation salaire, cout employeur, graphique salaire, calcul salaire net" />
+    <meta name="robots" content="index,follow" />
     <meta property="og:title" content="BrutNet 2.0 - Intelligence Salariale & Comparateur" />
     <meta property="og:description"
         content="Découvrez où part votre argent. Graphiques interactifs, simulation d'augmentation et calcul du coût réel employeur." />
     <meta property="og:type" content="website" />
     <meta name="theme-color" content="#6366f1">
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>BrutNet - Calculateur Salaire Brut → Net | France 2025</title>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW Registered', reg.scope))
-                    .catch(err => console.error('SW Failed', err));
-            });
-        }
-    </script>
 </body>
 
 </html>

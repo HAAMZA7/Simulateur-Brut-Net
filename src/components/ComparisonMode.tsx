@@ -15,6 +15,7 @@ interface ComparisonModeProps {
 
 export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calculerResultat }: ComparisonModeProps) {
     const augmentations = [5, 10, 15, 20];
+    const profileLabel = `${isCadre ? 'Cadre' : 'Non-cadre'} • ${isMarried ? 'Couple' : 'Seul'} • ${enfants} enfant${enfants > 1 ? 's' : ''}`;
 
     const comparisons = useMemo(() => {
         const current = calculerResultat(currentBrut);
@@ -26,7 +27,9 @@ export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calcu
                 newBrut,
                 newNet: result.netApresImpots,
                 delta: result.netApresImpots - current.netApresImpots,
-                deltaPct: ((result.netApresImpots - current.netApresImpots) / current.netApresImpots) * 100
+                deltaPct: current.netApresImpots > 0
+                    ? ((result.netApresImpots - current.netApresImpots) / current.netApresImpots) * 100
+                    : 0
             };
         });
     }, [currentBrut, calculerResultat]);
@@ -40,7 +43,17 @@ export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calcu
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
         >
-            <h3 className="apple-card__title">🚀 Simuler une augmentation</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'start', flexWrap: 'wrap', marginBottom: '24px' }}>
+                <div>
+                    <h3 className="apple-card__title" style={{ marginBottom: '8px' }}>🚀 Simuler une augmentation</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                        Impact réel sur le net après impôts pour votre profil actuel.
+                    </p>
+                </div>
+                <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', background: 'var(--color-bg-secondary)', padding: '8px 12px', borderRadius: '999px' }}>
+                    {profileLabel}
+                </span>
+            </div>
             <div className="simulation-grid">
                 {comparisons.map((c) => (
                     <motion.div
@@ -52,7 +65,7 @@ export function ComparisonMode({ currentBrut, isCadre, isMarried, enfants, calcu
                         <div className="simulation-details">
                             <div className="simulation-brut">{fmt(c.newBrut)} € brut</div>
                             <div className="simulation-net">{fmt(c.newNet)} € net</div>
-                            <div className="simulation-delta">+{fmt(c.delta)} €/mois</div>
+                            <div className="simulation-delta">+{fmt(c.delta)} €/mois • {c.deltaPct.toFixed(1)}%</div>
                         </div>
                     </motion.div>
                 ))}

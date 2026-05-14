@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 
 interface SalaryChartProps {
     netApresImpots: number;
@@ -10,11 +11,11 @@ interface SalaryChartProps {
 const COLORS = ['#22c55e', '#ef4444', '#f59e0b'];
 
 export function SalaryChart({ netApresImpots, cotisations, impot }: SalaryChartProps) {
-    const data = [
+    const data = useMemo(() => [
         { name: 'Net à payer', value: netApresImpots, color: '#22c55e' },
         { name: 'Cotisations', value: cotisations, color: '#ef4444' },
         { name: 'Impôts', value: impot, color: '#f59e0b' },
-    ].filter(d => d.value > 0);
+    ].filter(d => d.value > 0), [netApresImpots, cotisations, impot]);
 
     const total = data.reduce((acc, d) => acc + d.value, 0);
     const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
@@ -24,36 +25,42 @@ export function SalaryChart({ netApresImpots, cotisations, impot }: SalaryChartP
             className="apple-card"
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
         >
-            <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                    <Pie
-                        data={data}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={80}
-                        paddingAngle={3}
-                        dataKey="value"
-                        stroke="none"
-                    >
-                        {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        formatter={(value: any) => [`${fmt(Number(value))} €`]}
-                        contentStyle={{
-                            backgroundColor: 'var(--color-surface-card)',
-                            borderColor: 'var(--color-border-subtle)',
-                            borderRadius: 'var(--radius-sm)',
-                            color: 'var(--color-text-primary)',
-                            boxShadow: 'var(--effect-shadow-card)'
-                        }}
-                        itemStyle={{ color: 'var(--color-text-primary)' }}
-                        labelStyle={{ color: 'var(--color-text-secondary)' }}
-                    />
-                </PieChart>
-            </ResponsiveContainer>
+            {data.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                        <Pie
+                            data={data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={55}
+                            outerRadius={80}
+                            paddingAngle={3}
+                            dataKey="value"
+                            stroke="none"
+                        >
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value: number | string) => [`${fmt(Number(value))} €`]}
+                            contentStyle={{
+                                backgroundColor: 'var(--color-surface-card)',
+                                borderColor: 'var(--color-border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                color: 'var(--color-text-primary)',
+                                boxShadow: 'var(--effect-shadow-card)'
+                            }}
+                            itemStyle={{ color: 'var(--color-text-primary)' }}
+                            labelStyle={{ color: 'var(--color-text-secondary)' }}
+                        />
+                    </PieChart>
+                </ResponsiveContainer>
+            ) : (
+                <div style={{ height: 200, display: 'grid', placeItems: 'center', color: 'var(--color-text-secondary)', textAlign: 'center', padding: '24px' }}>
+                    Aucun montant à afficher pour le moment.
+                </div>
+            )}
 
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -150%)', textAlign: 'center', pointerEvents: 'none' }}>
                 <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{fmt(total)} €</span>
