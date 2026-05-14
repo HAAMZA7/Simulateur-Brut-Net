@@ -1,13 +1,8 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { SalaryChart } from './components/SalaryChart'
-import { ComparisonMode } from './components/ComparisonMode'
-import { EmployerCost } from './components/EmployerCost'
+import { useMemo, useState } from 'react'
 import './index.css'
 
-// Constants
 const TAUX_NON_CADRE = 0.22
-const TAUX_CADRE = 0.25
+const TAUX_CADRE = 0.255
 
 const TRANCHES_IMPOT = [
     { min: 0, max: 11497, taux: 0 },
@@ -18,11 +13,10 @@ const TRANCHES_IMPOT = [
 ]
 
 function calculerParts(isMarried: boolean, enfants: number): number {
-    const enfantsCount = Math.max(0, enfants)
     let parts = isMarried ? 2 : 1
-    if (enfantsCount >= 1) parts += 0.5
-    if (enfantsCount >= 2) parts += 0.5
-    if (enfantsCount >= 3) parts += (enfantsCount - 2) * 1
+    if (enfants >= 1) parts += 0.5
+    if (enfants >= 2) parts += 0.5
+    if (enfants >= 3) parts += enfants - 2
     return parts
 }
 
@@ -31,337 +25,150 @@ function calculerImpot(revenuNetImposable: number, parts: number): number {
     let impotParPart = 0
     for (const tranche of TRANCHES_IMPOT) {
         if (quotient > tranche.min) {
-            const montantDansTranche = Math.min(quotient, tranche.max) - tranche.min
-            impotParPart += montantDansTranche * tranche.taux
+            impotParPart += (Math.min(quotient, tranche.max) - tranche.min) * tranche.taux
         }
     }
     return impotParPart * parts
 }
 
-type Theme = 'dark' | 'light'
-const THEME_STORAGE_KEY = 'brutnet-theme'
+const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
 
-function App() {
-    const [isDemoMode, setIsDemoMode] = useState(false)
-    const [theme, setTheme] = useState<Theme>(() => {
-        if (typeof window === 'undefined') return 'light'
-
-        const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-        if (storedTheme === 'light' || storedTheme === 'dark') {
-            return storedTheme
-        }
-
-        return 'light'
-    })
-    const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme)
-        window.localStorage.setItem(THEME_STORAGE_KEY, theme)
-    }, [theme])
-
+export default function App() {
     const [montant, setMontant] = useState('3000')
     const [isCadre, setIsCadre] = useState(false)
+    const [isAnnual, setIsAnnual] = useState(false)
     const [mode, setMode] = useState<'brut' | 'net'>('brut')
     const [isMarried, setIsMarried] = useState(false)
     const [enfants, setEnfants] = useState(0)
-    const [isAnnual, setIsAnnual] = useState(false)
     const [is13thMonth, setIs13thMonth] = useState(false)
 
-    const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
     const parts = calculerParts(isMarried, enfants)
+    const taux = isCadre ? TAUX_CADRE : TAUX_NON_CADRE
     const annualFactor = is13thMonth ? 13 : 12
-    const inputFactor = isAnnual ? annualFactor : 1
-    const formatMoney = useCallback((n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }), [])
 
-    const calculerResultat = useCallback((brutInput: number) => {
-        const netAvantImpots = brutInput * (1 - taux)
-        const cotisations = brutInput - netAvantImpots
-        const netAnnuelAvantImpots = netAvantImpots * annualFactor
-        const impotAnnuel = calculerImpot(netAnnuelAvantImpots, parts)
-        const impotMensuel = annualFactor > 0 ? impotAnnuel / annualFactor : 0
-        const netApresImpots = netAvantImpots - impotMensuel
-        return { netApresImpots, cotisations, impotMensuel, netAvantImpots }
-    }, [taux, parts, annualFactor])
+    const r = useMemo(() => {
+        const raw = parseFloat(montant.replace(/\s/g, '').replace(',', '.')) || 0
+        const inputFactor = isAnnual ? annualFactor : 1
+        const monthlyInput = raw / inputFactor
 
-    const resultat = useMemo(() => {
-        const valeur = Number.parseFloat(montant.replace(/\s/g, '').replace(',', '.'))
-        const saisie = Number.isFinite(valeur) && valeur > 0 ? valeur : 0
-        let brutMensuel = 0
-        let netAvantImpots = 0
-        let cotisations = 0
-
-        const valeurMensuelle = inputFactor > 0 ? saisie / inputFactor : saisie
-
-        if (mode === 'brut') {
-            brutMensuel = valeurMensuelle
-            netAvantImpots = valeurMensuelle * (1 - taux)
-            cotisations = brutMensuel - netAvantImpots
-        } else {
-            netAvantImpots = valeurMensuelle
-            brutMensuel = taux < 1 ? valeurMensuelle / (1 - taux) : 0
-            cotisations = brutMensuel - netAvantImpots
-        }
-
-        const netAnnuelAvantImpots = netAvantImpots * annualFactor
-        const impotAnnuel = calculerImpot(netAnnuelAvantImpots, parts)
-        const impotMensuel = annualFactor > 0 ? impotAnnuel / annualFactor : 0
-        const netApresImpots = netAvantImpots - impotMensuel
-        const tauxImposition = netAnnuelAvantImpots > 0 ? (impotAnnuel / netAnnuelAvantImpots) * 100 : 0
-
-        const brutAnnuel = brutMensuel * annualFactor
-        const netApresImpotsAnnuel = netApresImpots * annualFactor
+        const brut = mode === 'brut' ? monthlyInput : monthlyInput / (1 - taux)
+        const cotisations = brut * taux
+        const netAvant = brut - cotisations
+        const impotAnnuel = calculerImpot(netAvant * annualFactor, parts)
+        const impotMensuel = impotAnnuel / annualFactor
+        const net = netAvant - impotMensuel
+        const coutEmployeur = brut * (isCadre ? 1.45 : 1.42)
 
         return {
-            brut: brutMensuel,
-            brutAnnuel,
-            netAvantImpots,
+            brut,
             cotisations,
-            tauxCotisations: taux * 100,
+            netAvant,
+            net,
+            netAnnuel: net * annualFactor,
             impotMensuel,
-            netApresImpots,
-            netApresImpotsAnnuel,
-            tauxImposition
+            impotAnnuel,
+            coutEmployeur,
+            tauxPrelevement: brut > 0 ? ((cotisations + impotMensuel) / brut) * 100 : 0,
+            pouvoirAchat: brut > 0 ? (net / brut) * 100 : 0
         }
-    }, [montant, taux, mode, parts, annualFactor, inputFactor])
+    }, [montant, isAnnual, annualFactor, mode, taux, parts, isCadre])
 
-    const insights = useMemo(() => {
-        const netAvant = resultat.netAvantImpots
-        const netApres = resultat.netApresImpots
-        const gainDisponible = netAvant > 0 ? (netApres / netAvant) * 100 : 0
-        const effortFiscal = 100 - gainDisponible
+    const inc = [100, 300, 500].map(v => {
+        const b = r.brut + v
+        const cot = b * taux
+        const netAvant = b - cot
+        const imp = calculerImpot(netAvant * annualFactor, parts) / annualFactor
+        const net = netAvant - imp
+        return { brutPlus: v, net, delta: net - r.net }
+    })
 
-        return {
-            gainDisponible,
-            effortFiscal,
-            economiePotentielle: Math.max(0, resultat.impotMensuel * 0.08), // ordre de grandeur pédagogique
-        }
-    }, [resultat])
-
-    const animProps: any = {
-        initial: { opacity: 0, y: 30 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.8, ease: "easeOut" }
-    }
+    const cotPct = r.brut > 0 ? (r.cotisations / r.brut) * 100 : 0
+    const netPct = r.brut > 0 ? (r.net / r.brut) * 100 : 0
 
     return (
-        <div className="app-container">
-            <header className="apple-header">
-                <span className="apple-header__logo">BrutNet</span>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <button
-                        type="button"
-                        onClick={() => setIsDemoMode(v => !v)}
-                        className={`apple-toggle__btn ${isDemoMode ? 'apple-toggle__btn--active' : ''}`}
-                        aria-label="Activer le mode démo"
-                    >
-                        Demo
-                    </button>
-                    <button
-                        type="button"
-                        onClick={toggleTheme}
-                        className="apple-toggle__btn"
-                        style={{ fontSize: '20px' }}
-                        aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
-                    >
-                        {theme === 'dark' ? '☀️' : '🌙'}
-                    </button>
-                </div>
+        <div className="shell">
+            <header className="topbar">
+                <div className="logo">Brut<span>Net</span></div>
+                <div className="chip">🇫🇷 Simulateur salaire France</div>
+                <nav className="nav">À propos &nbsp; Méthodologie &nbsp; Ressources</nav>
             </header>
 
-            <main>
-                {/* Hero: Focal Entry */}
-                <section className={`hero-section ${isDemoMode ? 'hero-section--demo' : ''}`}>
-                    <motion.h1
-                        className="hero-title"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        Calculez votre salaire net
-                    </motion.h1>
-                    <span className="hero-label">Simulateur intelligent • France 2025</span>
-                    {isDemoMode && (
-                        <motion.span
-                            className="demo-badge"
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.35 }}
-                        >
-                            Mode Présentation activé
-                        </motion.span>
-                    )}
-
-                    {/* Toggle Mensuel/Annuel */}
-                    <div className="apple-toggle" style={{ marginBottom: '24px' }}>
-                        <button className={`apple-toggle__btn ${!isAnnual ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsAnnual(false)}>Mensuel</button>
-                        <button className={`apple-toggle__btn ${isAnnual ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsAnnual(true)}>Annuel</button>
+            <main className="page">
+                <section className="hero">
+                    <div className="left">
+                        <h1>Calculez votre<br />salaire net</h1>
+                        <p>Simulateur intelligent • France 2025</p>
                     </div>
-
-                    <div className="apple-input-group">
-                        <input
-                            type="text"
-                            value={montant}
-                            onChange={(e) => setMontant(e.target.value.replace(/[^0-9]/g, ''))}
-                            className="apple-input"
-                            autoFocus
-                            inputMode="numeric"
-                            aria-label="Montant du salaire"
-                        />
-                        <span className="apple-input-unit">€ / {isAnnual ? 'an' : 'mois'} en {mode}</span>
-                    </div>
-
-                    <div className="apple-toggle mt-40">
-                        <button className={`apple-toggle__btn ${mode === 'brut' ? 'apple-toggle__btn--active' : ''}`} onClick={() => setMode('brut')}>Brut</button>
-                        <button className={`apple-toggle__btn ${mode === 'net' ? 'apple-toggle__btn--active' : ''}`} onClick={() => setMode('net')}>Net</button>
-                    </div>
-
-                    {/* Résultat Principal - Toujours visible */}
-                    <motion.div
-                        className="result-highlight"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                    >
-                        <span className="result-highlight__label">Net après impôts</span>
-                        <span className="result-highlight__value">{formatMoney(resultat.netApresImpots)} €<span className="result-highlight__suffix">/mois</span></span>
-                        <span className="result-highlight__annual">{formatMoney(resultat.netApresImpotsAnnuel)} €/an</span>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '8px' }}>
-                            <span style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '999px', background: 'rgba(34,197,94,0.12)', color: '#22c55e', fontWeight: 700 }}>
-                                Pouvoir d’achat: {insights.gainDisponible.toFixed(1)}%
-                            </span>
-                            <span style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '999px', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontWeight: 700 }}>
-                                Effort fiscal & social: {insights.effortFiscal.toFixed(1)}%
-                            </span>
+                    <div className="center">
+                        <div className="seg">
+                            <button className={!isAnnual ? 'on' : ''} onClick={() => setIsAnnual(false)}>Mensuel</button>
+                            <button className={isAnnual ? 'on' : ''} onClick={() => setIsAnnual(true)}>Annuel</button>
                         </div>
-                    </motion.div>
+                        <input value={montant} onChange={e => setMontant(e.target.value.replace(/[^0-9]/g, ''))} />
+                        <div className="unit">/ {isAnnual ? 'an' : 'mois'} en {mode}</div>
+                        <div className="seg">
+                            <button className={mode === 'brut' ? 'on' : ''} onClick={() => setMode('brut')}>Brut</button>
+                            <button className={mode === 'net' ? 'on' : ''} onClick={() => setMode('net')}>Net</button>
+                        </div>
+                    </div>
+                    <div className="kpi card">
+                        <h3>Votre salaire net après impôts</h3>
+                        <div className="v">{fmt(r.net)} € <small>/ mois</small></div>
+                        <div className="sub">{fmt(r.netAnnuel)} € / an</div>
+                        <div className="kpi-row">
+                            <div><span>Taux de prélèvement</span><strong>{r.tauxPrelevement.toFixed(1)} %</strong></div>
+                            <div><span>Pouvoir d’achat</span><strong className="green">+{r.pouvoirAchat.toFixed(1)} %</strong></div>
+                            <div><span>Coût employeur</span><strong>{fmt(r.coutEmployeur)} €</strong></div>
+                        </div>
+                    </div>
                 </section>
 
-                <div className="section-divider" />
+                <section className="config card">
+                    <h2>Configuration</h2>
+                    <div className="grid4">
+                        <div><label>Statut professionnel</label><div className="seg"><button className={!isCadre ? 'on' : ''} onClick={() => setIsCadre(false)}>Non-cadre</button><button className={isCadre ? 'on' : ''} onClick={() => setIsCadre(true)}>Cadre</button></div></div>
+                        <div><label>Situation familiale</label><div className="seg"><button className={!isMarried ? 'on' : ''} onClick={() => setIsMarried(false)}>Célibataire</button><button className={isMarried ? 'on' : ''} onClick={() => setIsMarried(true)}>Marié / Pacsé</button></div></div>
+                        <div><label>Enfants à charge</label><div className="counter"><button onClick={() => setEnfants(Math.max(0, enfants - 1))}>−</button><b>{enfants}</b><button onClick={() => setEnfants(enfants + 1)}>+</button></div></div>
+                        <div><label>Options</label><label className="check"><input type="checkbox" checked={is13thMonth} onChange={e => setIs13thMonth(e.target.checked)} />13ème mois</label></div>
+                    </div>
+                </section>
 
-                {/* Configuration: Compact & Centered */}
-                <motion.section className="apple-card" {...animProps}>
-                    <h2 className="apple-card__title">Configuration</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-                        <div>
-                            <span className="hero-label" style={{ fontSize: '12px' }}>VOTRE STATUT</span>
-                            <div className="apple-toggle">
-                                <button type="button" className={`apple-toggle__btn ${!isCadre ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsCadre(false)}>Non-cadre</button>
-                                <button type="button" className={`apple-toggle__btn ${isCadre ? 'apple-toggle__btn--active' : ''}`} onClick={() => setIsCadre(true)}>Cadre</button>
-                            </div>
-                        </div>
-                        <div>
-                            <span className="hero-label" style={{ fontSize: '12px' }}>VOTRE FAMILLE</span>
-                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <button
-                                    type="button"
-                                    className={`apple-toggle__btn ${isMarried ? 'apple-toggle__btn--active' : ''}`}
-                                    style={{ background: 'var(--color-bg-secondary)' }}
-                                    onClick={() => setIsMarried(!isMarried)}
-                                >
-                                    {isMarried ? 'Couple' : 'Seul'}
-                                </button>
-                                <div className="apple-toggle" style={{ gap: '12px', padding: '4px 12px' }}>
-                                    <button type="button" onClick={() => setEnfants(Math.max(0, enfants - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-primary)' }}>-</button>
-                                    <span style={{ fontWeight: 600 }}>{enfants} enfant{enfants > 1 ? 's' : ''}</span>
-                                    <button type="button" onClick={() => setEnfants(enfants + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-primary)' }}>+</button>
-                                </div>
-                            </div>
-                            {/* Option 13ème mois */}
-                            <div style={{ marginTop: '16px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <input type="checkbox" checked={is13thMonth} onChange={(e) => setIs13thMonth(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-brand)' }} />
-                                    <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>13ème mois</span>
-                                </label>
-                            </div>
+                <section className="triple">
+                    <div className="card">
+                        <h2>Répartition du salaire brut</h2>
+                        <div className="donut" style={{ ['--p' as any]: `${netPct}%` }}><span>{fmt(r.brut)} €<small>Brut</small></span></div>
+                        <ul className="list">
+                            <li><span>Salaire net après impôts</span><b>{fmt(r.net)} €</b><em>{netPct.toFixed(1)} %</em></li>
+                            <li><span>Cotisations sociales</span><b>{fmt(r.cotisations)} €</b><em>{cotPct.toFixed(1)} %</em></li>
+                            <li><span>Impôt sur le revenu</span><b>{fmt(r.impotMensuel)} €</b><em>{(100 - netPct - cotPct).toFixed(1)} %</em></li>
+                        </ul>
+                    </div>
+                    <div className="card">
+                        <h2>Récapitulatif</h2>
+                        <ul className="list">
+                            <li><span>Salaire brut</span><b>{fmt(r.brut)} €</b></li>
+                            <li><span>Cotisations sociales</span><b>-{fmt(r.cotisations)} €</b></li>
+                            <li><span>Impôt sur le revenu</span><b>-{fmt(r.impotMensuel)} €</b></li>
+                        </ul>
+                        <div className="total">Net après impôts <b>{fmt(r.net)} € <small>/ mois</small></b><small>{fmt(r.netAnnuel)} € / an</small></div>
+                    </div>
+                    <div className="card">
+                        <h2>Et si vous gagniez plus ?</h2>
+                        <div className="inc-grid">
+                            {inc.map((x, i) => <article key={x.brutPlus} className={i === 1 ? 'focus' : ''}><h4>+ {x.brutPlus} € / mois</h4><strong>{fmt(x.net)} €</strong><span>net après impôts</span><p>+ {fmt(x.delta)} € / mois</p></article>)}
                         </div>
                     </div>
-                </motion.section>
+                </section>
 
-                {/* Main Results */}
-                <motion.section className="apple-card" {...animProps}>
-                    <h2 className="apple-card__title">Récapitulatif</h2>
-                    <div className="apple-list-row">
-                        <span className="apple-list-label">Salaire Brut</span>
-                        <span className="apple-list-value">{formatMoney(resultat.brut)} €</span>
+                <section className="employer card">
+                    <h2>Coût pour l’employeur</h2>
+                    <div className="row">
+                        <div><span>Salaire brut</span><b>{fmt(r.brut)} €</b></div>
+                        <div><span>Charges patronales</span><b>{fmt(r.coutEmployeur - r.brut)} €</b></div>
+                        <div><span>Coût total employeur</span><b>{fmt(r.coutEmployeur)} € / mois</b></div>
                     </div>
-                    <div className="apple-list-row">
-                        <span className="apple-list-label">Salaire Brut annuel ({annualFactor} mois)</span>
-                        <span className="apple-list-value">{formatMoney(resultat.brutAnnuel)} €</span>
-                    </div>
-                    <div className="apple-list-row">
-                        <span className="apple-list-label">Cotisations ({resultat.tauxCotisations}%)</span>
-                        <span className="apple-list-value">-{formatMoney(resultat.cotisations)} €</span>
-                    </div>
-                    <div className="apple-list-row">
-                        <span className="apple-list-label">Impôt sur le revenu (Prélèvement à la source)</span>
-                        <span className="apple-list-value">-{formatMoney(resultat.impotMensuel)} €</span>
-                    </div>
-                    <div className="apple-list-row apple-list-row--total">
-                        <span className="apple-list-label" style={{ fontSize: '20px', fontWeight: 600 }}>Net après impôts</span>
-                        <span className="apple-list-value">{formatMoney(resultat.netApresImpots)} €/mois</span>
-                    </div>
-                    <div className="apple-list-row">
-                        <span className="apple-list-label">Potentiel d’optimisation (indicatif)</span>
-                        <span className="apple-list-value" style={{ color: '#22c55e' }}>+{formatMoney(insights.economiePotentielle)} €/mois</span>
-                    </div>
-                </motion.section>
-
-                {/* Analysis */}
-                <motion.section className="apple-card" {...animProps}>
-                    <h2 className="apple-card__title">Répartition Visuelle</h2>
-                    <div style={{ height: '300px' }}>
-                    <SalaryChart
-                        netApresImpots={resultat.netApresImpots}
-                        cotisations={resultat.cotisations}
-                        impot={resultat.impotMensuel}
-                    />
-                    </div>
-                </motion.section>
-
-                <div className="section-divider" />
-
-                {/* Advanced Tools */}
-                <motion.section {...animProps}>
-                    <ComparisonMode
-                        currentBrut={resultat.brut}
-                        isCadre={isCadre}
-                        isMarried={isMarried}
-                        enfants={enfants}
-                        calculerResultat={calculerResultat}
-                    />
-                </motion.section>
-
-                <motion.section {...animProps} className="mt-40">
-                    <EmployerCost
-                        brutMensuel={resultat.brut}
-                        isCadre={isCadre}
-                        annualFactor={annualFactor}
-                    />
-                </motion.section>
+                </section>
             </main>
-
-            <footer className="signature-container">
-                <p style={{ color: 'var(--color-text-tertiary)', fontSize: '13px', marginBottom: '16px' }}>
-                    Simulateur basé sur les lois de finances 2025. Précision indicative.
-                </p>
-                <div className="signature-content">
-                    <span className="made-text">Made with</span>
-                    <span className="heart">❤️</span>
-                    <span className="by-text">by <strong>Hamza DJOUDI</strong></span>
-                </div>
-                <a
-                    href="https://djoudi.dev"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="signature-link"
-                >
-                    djoudi.dev
-                </a>
-            </footer>
         </div>
     )
 }
-
-export default App
