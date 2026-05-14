@@ -43,14 +43,14 @@ const THEME_STORAGE_KEY = 'brutnet-theme'
 
 function App() {
     const [theme, setTheme] = useState<Theme>(() => {
-        if (typeof window === 'undefined') return 'dark'
+        if (typeof window === 'undefined') return 'light'
 
         const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
         if (storedTheme === 'light' || storedTheme === 'dark') {
             return storedTheme
         }
 
-        return 'dark'
+        return 'light'
     })
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
 

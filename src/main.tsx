@@ -11,7 +11,7 @@ function applyInitialTheme() {
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
     const theme = storedTheme === 'light' || storedTheme === 'dark'
         ? storedTheme
-        : 'dark'
+        : 'light'
 
     document.documentElement.setAttribute('data-theme', theme)
 }
